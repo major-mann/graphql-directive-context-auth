@@ -1,0 +1,23 @@
+{
+  "name": "@major-mann/graphql-directive-context",
+  "version": "0.0.1",
+  "description": "A directive for performing auth based on context values",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "graphql",
+    "directive",
+    "auth",
+    "authorization",
+    "context"
+  ],
+  "author": "Calvin Mann <calvinmann+npm@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server-core": "^2.4.8",
+    "graphql": "^14.1.1",
+    "graphql-tools": "^4.0.4"
+  }
+}
