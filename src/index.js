@@ -4,7 +4,7 @@ const { defaultFieldResolver } = require('graphql');
 const { SchemaDirectiveVisitor } = require('graphql-tools');
 const { AuthenticationError } = require('apollo-server-core');
 
-function createAuthDirective({ userField = 'user' } = {}) {
+function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}) {
     class AuthDirective extends SchemaDirectiveVisitor {
         visitFieldDefinition(field) {
             const originalResolver = field.resolve || defaultFieldResolver;
@@ -152,7 +152,7 @@ function createAuthDirective({ userField = 'user' } = {}) {
             value: String!
         }
 
-        directive @auth(
+        directive @${directiveName}(
             checks: [AuthDirectiveInput!]
         ) on FIELD_DEFINITION
     `;
