@@ -1,6 +1,6 @@
 {
   "name": "@major-mann/graphql-directive-context-auth",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A directive for performing auth based on context values",
   "main": "src/index.js",
   "scripts": {

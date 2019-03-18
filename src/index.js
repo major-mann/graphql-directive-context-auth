@@ -8,8 +8,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
     class AuthDirective extends SchemaDirectiveVisitor {
         visitFieldDefinition(field) {
             const originalResolver = field.resolve || defaultFieldResolver;
-            const checks = this.args.checks
-                .map(prepareCheck);
+            const checks = this.args.checks && this.args.checks.map(prepareCheck);
             field.resolve = resolve;
 
             function prepareCheck(check) {
