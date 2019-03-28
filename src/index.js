@@ -1,5 +1,6 @@
 module.exports = createAuthDirective;
 
+const { parse } = require('esprima');
 const { defaultFieldResolver } = require('graphql');
 const { SchemaDirectiveVisitor } = require('graphql-tools');
 const { AuthenticationError } = require('apollo-server-core');
@@ -12,18 +13,9 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
             field.resolve = resolve;
 
             function prepareCheck(check) {
-                const fieldStr = fullFieldName(check.field);
-                // Create a field getter
-                check.fieldValue = new Function('context', `return ${fieldStr};`);
+                // Create a function to access the property
+                check.fieldValue = buildAccessorFunction(check.field);
                 return check;
-
-                function fullFieldName(accessor) {
-                    if (accessor.trim().startsWith('[')) {
-                        return `context${accessor}`;
-                    } else {
-                        return `context.${accessor}`;
-                    }
-                }
             }
 
             async function resolve(root, args, context, info) {
@@ -156,4 +148,52 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
         ) on FIELD_DEFINITION
     `;
     return { AuthDirective, AuthDirectiveSchema };
+
+    function buildAccessorFunction(str) {
+        const names = getNames();
+        return function accessor(context) {
+            let obj = context;
+            const nameValues = names.slice();
+            while (obj != undefined && nameValues.length) {
+                obj = obj[nameValues.shift()];
+            }
+            return obj;
+        };
+
+        function getNames() {
+            let ast = parse(str);
+            if (!ast || !ast.body || !ast.body[0] || ast.body[0].type !== 'ExpressionStatement') {
+                throw new Error(`Unable to parse "${str}"`);
+            }
+            ast = ast.body[0].expression;
+
+            const parts = Array.from(process(ast));
+            return parts;
+
+            function* process(node) {
+                if (node.type === 'Identifier') {
+                    yield node.name;
+                } else if (node.type === 'MemberExpression') {
+                    for (const identifier of process(node.object)) {
+                        yield identifier;
+                    }
+                    if (node.property.type === 'Literal') {
+                        yield node.property.value;
+                    } else if (node.property.type === 'Identifier') {
+                        yield node.property.name;
+                    } else {
+                        throw new Error(`Unable to parse "${str}"`);
+                    }
+                } else if (node.type === 'ArrayExpression') {
+                    if (node.elements.length === 1 || node.elements[0].type !== 'Literal') {
+                        yield node.elements[0].value;
+                    } else {
+                        throw new Error(`Unable to parse "${str}"`);
+                    }
+                } else {
+                    throw new Error(`Invalid AST node type "${node.type}" received`);
+                }
+            }
+        }
+    }
 }
