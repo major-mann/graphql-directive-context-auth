@@ -120,7 +120,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
             }
         }
     }
-    // TODO: Add OBJECT
+
     const AuthDirectiveSchema = `
         enum AuthDirectiveOperation {
             LT
