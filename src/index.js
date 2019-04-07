@@ -7,9 +7,15 @@ const { AuthenticationError } = require('apollo-server-core');
 
 function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}) {
     class AuthDirective extends SchemaDirectiveVisitor {
+        visitObject(object) {
+            Object.keys(object._fields).forEach(field => this.visitFieldDefinition(object._fields[field]));
+        }
         visitFieldDefinition(field) {
             const originalResolver = field.resolve || defaultFieldResolver;
             const checks = this.args.checks && this.args.checks.map(prepareCheck);
+            // Note: We attach the handler so it can be overwritten in the case an object
+            //  scope directive was set
+            field.usageValidation = usageValidation;
             field.resolve = resolve;
 
             function prepareCheck(check) {
@@ -19,14 +25,20 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
             }
 
             async function resolve(root, args, context, info) {
+                if (typeof field.usageValidation === 'function') {
+                    field.usageValidation();
+                }
+                const result = await originalResolver(root, args, context, info);
+                return result;
+            }
+
+            function usageValidation() {
                 if (userField && !context[userField]) {
                     throw new AuthenticationError('User not authenticated');
                 }
                 if (Array.isArray(checks)) {
                     checks.forEach(filter => validate(field.name, context, filter));
                 }
-                const result = await originalResolver(root, args, context, info);
-                return result;
             }
 
             function validate(fieldName, context, filter) {
@@ -129,7 +141,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
 
         directive @${directiveName}(
             checks: [AuthDirectiveInput!]
-        ) on FIELD_DEFINITION
+        ) on OBJECT | FIELD_DEFINITION
     `;
     return { AuthDirective, AuthDirectiveSchema };
 
