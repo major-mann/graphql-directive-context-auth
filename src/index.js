@@ -31,8 +31,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
 
             function validate(fieldName, context, filter) {
                 switch (filter.op) {
-                    case 'LT':
-                    case 'LESS_THAN': {
+                    case 'LT': {
                         const value = filter.fieldValue(context);
                         if (value < filter.value === false){
                             console.info(`User invalid because context.${filter.field} ("${value}") is not ` +
@@ -41,8 +40,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
                         }
                         break;
                     }
-                    case 'LTE':
-                    case 'LESS_THAN_EQUAL': {
+                    case 'LTE': {
                         const value = filter.fieldValue(context);
                         if (value <= filter.value === false) {
                             console.info(`User invalid because context.${filter.field} ("${value}") is not ` +
@@ -51,9 +49,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
                         }
                         break;
                     }
-                    case 'E':
-                    case 'EQ':
-                    case 'EQUAL': {
+                    case 'EQ': {
                         const value = filter.fieldValue(context);
                         if (value != filter.value) {
                             console.info(`User invalid because context.${filter.field} ("${value}") is not ` +
@@ -62,9 +58,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
                         }
                         break;
                     }
-                    case 'NE':
-                    case 'NEQ':
-                    case 'NOT_EQUAL': {
+                    case 'NE': {
                         const value = filter.fieldValue(context);
                         if (value == filter.value) {
                             console.info(`User invalid because context.${filter.field} ("${value}") is ` +
@@ -73,8 +67,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
                         }
                         break;
                     }
-                    case 'GTE':
-                    case 'GREATER_THAN_EQUAL': {
+                    case 'GTE': {
                         const value = filter.fieldValue(context);
                         if (value >= filter.value === false) {
                             console.info(`User invalid because context.${filter.field} ("${value}") is not ` +
@@ -83,8 +76,7 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
                         }
                         break;
                     }
-                    case 'GT':
-                    case 'GREATER_THAN': {
+                    case 'GT': {
                         const value = filter.fieldValue(context);
                         if (value >= filter.value === false) {
                             console.info(`User invalid because context.${filter.field} ("${value}") is not ` +
@@ -116,23 +108,15 @@ function createAuthDirective({ directiveName = 'auth', userField = 'user' } = {}
             }
         }
     }
-
+    // TODO: Add OBJECT
     const AuthDirectiveSchema = `
         enum AuthDirectiveOperation {
             LT
             LTE
-            E
             EQ
             NE
-            NEQ
             GTE
             GT
-            LESS_THAN
-            LESS_THAN_EQUAL
-            EQUAL
-            NOT_EQUAL
-            GREATER_THAN_EQUAL
-            GREATER_THAN
             CONTAINS
             NOT_CONTAINS
         }
